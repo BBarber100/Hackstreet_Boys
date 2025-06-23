@@ -1,3 +1,110 @@
+// Helper: Group spendings by date (expenses only, sum absolute values)
+function groupSpendingsByDate(data) {
+  const spendings = {};
+  data.forEach(row => {
+    const date = row['date'];
+    const cat = row['category'];
+    const amt = parseFloat(row['amount']);
+    // Only include negative (expense) amounts and exclude 'Income' category
+    if (!isNaN(amt) && amt < 0 && cat.toLowerCase() !== 'income') {
+      if (!spendings[date]) spendings[date] = 0;
+      spendings[date] += Math.abs(amt);
+    }
+  });
+  // Sort by date
+  const sorted = Object.entries(spendings).sort((a, b) => new Date(a[0]) - new Date(b[0]));
+  return {
+    dates: sorted.map(([date]) => date),
+    amounts: sorted.map(([, amount]) => amount)
+  };
+}
+
+// Render line chart for spendings over time
+function renderLineChart(spendingData) {
+  const ctx = document.getElementById('secondaryChart').getContext('2d');
+  if (window.secondaryLineChart) window.secondaryLineChart.destroy();
+  window.secondaryLineChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: spendingData.dates,
+      datasets: [{
+        label: 'Daily Spendings',
+        data: spendingData.amounts,
+        fill: true,
+        borderColor: '#6366F1',
+        backgroundColor: 'rgba(99,102,241,0.12)',
+        pointBackgroundColor: '#6366F1',
+        pointRadius: 4,
+        tension: 0.3,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: false
+        },
+        title: {
+          display: true,
+          text: 'Spendings Over Time',
+          color: '#23232a',
+          font: {
+            family: 'Inter, Poppins, Arial, sans-serif',
+            size: 20,
+            weight: 700,
+          },
+          padding: {top: 18, bottom: 18},
+          align: 'center',
+        },
+        tooltip: {
+          backgroundColor: '#fff',
+          titleColor: '#6366F1',
+          bodyColor: '#23232a',
+          borderColor: '#6366F1',
+          borderWidth: 1.5,
+          titleFont: {family: 'Inter, Poppins, Arial, sans-serif', weight: 700, size: 16},
+          bodyFont: {family: 'Inter, Poppins, Arial, sans-serif', weight: 500, size: 15},
+          padding: 16,
+          cornerRadius: 12,
+        }
+      },
+      layout: {
+        padding: 32
+      },
+      animation: {
+        duration: 1200,
+        easing: 'easeOutCubic',
+      },
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: 'Date',
+            color: '#6366F1',
+            font: {weight: 600, size: 15}
+          },
+          ticks: {
+            color: '#6366F1',
+            font: {weight: 500, size: 13}
+          }
+        },
+        y: {
+          title: {
+            display: true,
+            text: 'Spendings ($)',
+            color: '#6366F1',
+            font: {weight: 600, size: 15}
+          },
+          ticks: {
+            color: '#6366F1',
+            font: {weight: 500, size: 13}
+          },
+          beginAtZero: true
+        }
+      }
+    }
+  });
+}
 // dashboard.js
 // Handles pie chart creation for category totals from CSV
 
@@ -123,5 +230,8 @@ function renderPieChart(sums) {
     const data = parseCSV(csvText);
     const sums = groupByCategory(data);
     renderPieChart(sums);
+    // Render line chart for spendings over time
+    const spendingData = groupSpendingsByDate(data);
+    renderLineChart(spendingData);
   };
 })();
