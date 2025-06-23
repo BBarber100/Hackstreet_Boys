@@ -1,3 +1,28 @@
+/* Filters Section */
+.filters-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 18px;
+  padding: 8px 0 0 0;
+}
+.filter-input {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1.5px solid #c7d2fe;
+  background: #fff;
+  color: #23232a;
+  font-size: 1rem;
+  font-family: var(--font-main);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 4px 0 rgba(99,102,241,0.08);
+  outline: none;
+}
+.filter-input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 2px 8px 0 rgba(99,102,241,0.13);
+}
 #csv-table-container .amount-positive {
   color: #22c55e;
   text-shadow: 0 0 8px #bbf7d0, 0 0 2px #22c55e;

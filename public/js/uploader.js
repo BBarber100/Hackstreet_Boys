@@ -1,3 +1,13 @@
+// Helper to format date as DD/MM/YYYY
+function formatDateDMY(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d)) return dateStr;
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+}
 const dropArea = document.getElementById('drop-area');
 const fileElem = document.getElementById('fileElem');
 const fileInfo = document.getElementById('file-info');
@@ -44,6 +54,8 @@ window.handleFiles = function(files) {
 }
 
 
+
+// Enhanced displayCSVTable with filtering
 function displayCSVTable(csvText) {
   const container = document.getElementById('csv-table-container');
   const tableSection = document.getElementById('csv-table-section');
@@ -55,8 +67,80 @@ function displayCSVTable(csvText) {
   const dataRows = rows.slice(1);
   const rowsPerPage = 10;
   let currentPage = 1;
-  const totalPages = Math.ceil(dataRows.length / rowsPerPage);
+  let filteredRows = dataRows;
 
+  // Populate category filter
+  const catIdx = header.findIndex(h => h.trim().toLowerCase() === 'category');
+  const filterCategory = document.getElementById('filter-category');
+  if (catIdx !== -1 && filterCategory) {
+    const cats = Array.from(new Set(dataRows.map(r => r[catIdx]).filter(Boolean)));
+    filterCategory.innerHTML = '<option value="">All Categories</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+  }
+
+  // Filtering logic
+  function applyFilters() {
+    const search = document.getElementById('filter-search').value.toLowerCase();
+    const category = document.getElementById('filter-category').value;
+    const startDate = document.getElementById('filter-start-date').value;
+    const endDate = document.getElementById('filter-end-date').value;
+    const dateIdx = header.findIndex(h => h.trim().toLowerCase() === 'date');
+    filteredRows = dataRows.filter(row => {
+      let match = true;
+      // Search
+      if (search) {
+        match = row.some(cell => cell.toLowerCase().includes(search));
+      }
+      // Category
+      if (match && category) {
+        match = row[catIdx] === category;
+      }
+      // Date range (compare as timestamps)
+      if (match && (startDate || endDate) && dateIdx !== -1) {
+        const parseDate = v => {
+          if (!v) return 0;
+          if (v.includes('/')) {
+            // DD/MM/YYYY
+            const parts = v.split('/');
+            if (parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]).getTime();
+          }
+          return Date.parse(v);
+        };
+        const rowDate = parseDate(row[dateIdx]);
+        if (startDate) {
+          const startTs = Date.parse(startDate);
+          match = match && rowDate >= startTs;
+        }
+        if (endDate) {
+          const endTs = Date.parse(endDate);
+          match = match && rowDate <= endTs;
+        }
+      }
+      return match;
+    });
+    currentPage = 1;
+    renderTable(currentPage);
+  }
+
+  // Attach filter events
+  ['filter-search', 'filter-category', 'filter-start-date', 'filter-end-date'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.oninput = applyFilters;
+  });
+  const clearBtn = document.getElementById('filter-clear');
+  if (clearBtn) clearBtn.onclick = function() {
+    document.getElementById('filter-search').value = '';
+    document.getElementById('filter-category').value = '';
+    document.getElementById('filter-start-date').value = '';
+    document.getElementById('filter-end-date').value = '';
+    applyFilters();
+  };
+
+
+  // Sorting state
+  let sortCol = null;
+  let sortDir = 1; // 1 = asc, -1 = desc
+
+  // Table rendering with filteredRows and sorting
   function renderTable(page) {
     container.innerHTML = '';
     const table = document.createElement('table');
@@ -64,24 +148,64 @@ function displayCSVTable(csvText) {
     table.style.borderCollapse = 'collapse';
     // Header
     const trHead = document.createElement('tr');
-    header.forEach(cell => {
+    header.forEach((cell, colIdx) => {
       const th = document.createElement('th');
-      th.textContent = cell.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
       th.style.fontWeight = 'bold';
       th.style.textTransform = 'capitalize';
+      th.style.cursor = 'pointer';
+      let arrow = '';
+      if (sortCol === colIdx) arrow = sortDir === 1 ? ' ▲' : ' ▼';
+      th.innerHTML = cell.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) + arrow;
+      th.onclick = () => {
+        if (sortCol === colIdx) {
+          sortDir *= -1;
+        } else {
+          sortCol = colIdx;
+          sortDir = 1;
+        }
+        filteredRows.sort((a, b) => {
+          let va = a[colIdx], vb = b[colIdx];
+          // If date column, parse as YYYY-MM-DD or DD/MM/YYYY for sorting
+          if (header[colIdx].trim().toLowerCase() === 'date') {
+            const parseDate = v => {
+              if (!v) return 0;
+              if (v.includes('/')) {
+                // DD/MM/YYYY
+                const parts = v.split('/');
+                if (parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]).getTime();
+              }
+              return Date.parse(v);
+            };
+            return (parseDate(va) - parseDate(vb)) * sortDir;
+          }
+          // Try to compare as numbers if possible
+          const na = parseFloat(va.replace ? va.replace(/[^\d.-]/g, '') : va);
+          const nb = parseFloat(vb.replace ? vb.replace(/[^\d.-]/g, '') : vb);
+          if (!isNaN(na) && !isNaN(nb)) {
+            return (na - nb) * sortDir;
+          }
+          // Fallback to string
+          return va.localeCompare(vb) * sortDir;
+        });
+        renderTable(1);
+      };
       trHead.appendChild(th);
     });
     table.appendChild(trHead);
     // Data
     const startIdx = (page - 1) * rowsPerPage;
-    const endIdx = Math.min(startIdx + rowsPerPage, dataRows.length);
-    // Find the index of the amount column
+    const endIdx = Math.min(startIdx + rowsPerPage, filteredRows.length);
     const amountColIdx = header.findIndex(h => h.trim().toLowerCase() === 'amount');
+    const dateColIdx = header.findIndex(h => h.trim().toLowerCase() === 'date');
     for (let i = startIdx; i < endIdx; i++) {
       const tr = document.createElement('tr');
-      dataRows[i].forEach((cell, colIdx) => {
+      filteredRows[i].forEach((cell, colIdx) => {
         const td = document.createElement('td');
-        td.textContent = cell;
+        if (colIdx === dateColIdx) {
+          td.textContent = formatDateDMY(cell);
+        } else {
+          td.textContent = cell;
+        }
         if (colIdx === amountColIdx) {
           const num = parseFloat(cell.replace(/[^\d.-]/g, ''));
           if (!isNaN(num)) {
@@ -95,6 +219,7 @@ function displayCSVTable(csvText) {
     }
     container.appendChild(table);
     // Pagination
+    const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
     if (totalPages > 1) {
       const pagination = document.createElement('div');
       pagination.className = 'pagination';
@@ -112,4 +237,6 @@ function displayCSVTable(csvText) {
     }
   }
   renderTable(currentPage);
+  // Initial filter to populate table
+  applyFilters();
 }

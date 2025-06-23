@@ -48,6 +48,15 @@
         </section>
         <section class="card card-table" id="csv-table-section" style="display:none;">
           <h2>Transactions</h2>
+          <div class="filters-section" id="filters-section">
+            <input type="text" id="filter-search" class="filter-input" placeholder="🔍 Search...">
+            <select id="filter-category" class="filter-input">
+              <option value="">All Categories</option>
+            </select>
+            <input type="date" id="filter-start-date" class="filter-input" placeholder="Start Date">
+            <input type="date" id="filter-end-date" class="filter-input" placeholder="End Date">
+            <button id="filter-clear" class="button" style="margin-left:8px;">Clear</button>
+          </div>
           <div id="csv-table-container"></div>
         </section>
       </main>
