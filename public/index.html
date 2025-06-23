@@ -14,8 +14,8 @@
         <h1>Finance Dashboard</h1>
         <p class="subtitle">Upload and visualize your CSV transactions</p>
       </header>
-      <main class="dashboard-main">
-        <section class="card card-uploader">
+      <main class="dashboard-main vertical-layout">
+        <section class="card card-uploader full-width">
           <h2>CSV Uploader</h2>
           <div id="drop-area" class="uploader-area">
             <form class="my-form">
@@ -36,11 +36,14 @@
             <canvas id="secondaryChart"></canvas>
           </div>
         </section>
+        <section class="card card-table" id="csv-table-section" style="display:none;">
+          <h2>CSV Data</h2>
+          <div id="csv-table-container"></div>
+        </section>
       </main>
     </div>
   </div>
   <div id="file-info"></div>
-  <div id="csv-table-container"></div>
   <script src="js/uploader.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="js/dashboard.js"></script>
