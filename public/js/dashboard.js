@@ -43,6 +43,9 @@ function renderPieChart(sums) {
       datasets: [{
         data: amounts,
         backgroundColor: backgroundColors.slice(0, categories.length),
+        borderWidth: 2,
+        borderColor: '#fff',
+        hoverOffset: 10,
       }]
     },
     options: {
@@ -50,10 +53,62 @@ function renderPieChart(sums) {
       plugins: {
         legend: {
           position: 'right',
+          align: 'center',
+          labels: {
+            boxWidth: 22,
+            boxHeight: 16,
+            borderRadius: 8,
+            padding: 24,
+            font: {
+              family: 'Inter, Poppins, Arial, sans-serif',
+              size: 16,
+              weight: 600,
+            },
+            color: '#6366F1',
+            usePointStyle: true,
+            pointStyle: 'circle',
+          }
         },
         title: {
           display: true,
-          text: 'Total Amounts by Category'
+          text: 'Total Amounts by Category',
+          color: '#23232a',
+          font: {
+            family: 'Inter, Poppins, Arial, sans-serif',
+            size: 22,
+            weight: 700,
+          },
+          padding: {top: 18, bottom: 32},
+          align: 'center',
+        },
+        tooltip: {
+          backgroundColor: '#fff',
+          titleColor: '#6366F1',
+          bodyColor: '#23232a',
+          borderColor: '#6366F1',
+          borderWidth: 1.5,
+          titleFont: {family: 'Inter, Poppins, Arial, sans-serif', weight: 700, size: 16},
+          bodyFont: {family: 'Inter, Poppins, Arial, sans-serif', weight: 500, size: 15},
+          padding: 16,
+          cornerRadius: 12,
+        }
+      },
+      layout: {
+        padding: 32
+      },
+      animation: {
+        animateRotate: true,
+        animateScale: true,
+        duration: 1400,
+        easing: 'easeOutElastic',
+        onProgress: function(animation) {
+          // Microanimation: pulse shadow on chart draw
+          const chart = animation.chart.canvas;
+          chart.style.boxShadow = `0 0 ${8 + 8 * animation.currentStep / animation.numSteps}px 2px #6366F1${animation.currentStep % 2 === 0 ? '33' : '22'}`;
+        },
+        onComplete: function(animation) {
+          // Remove shadow after animation
+          animation.chart.canvas.style.boxShadow = '0 4px 32px 0 rgba(99,102,241,0.10)';
         }
       }
     }
