@@ -191,10 +191,10 @@ function renderPieChart(sums) {
             boxWidth: 22,
             boxHeight: 16,
             borderRadius: 8,
-            padding: 24,
+            padding: 16, // Increased padding to move labels down
             font: {
               family: 'Inter, Poppins, Arial, sans-serif',
-              size: 16,
+              size: 13, // Slightly smaller font size
               weight: 600,
             },
             color: '#6366F1',
