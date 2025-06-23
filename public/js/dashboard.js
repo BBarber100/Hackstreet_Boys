@@ -46,9 +46,14 @@ document.addEventListener('DOMContentLoaded', function() {
       storeTransaction(tx);
       showTransactionMessage('Transaction added!');
       clearTransactionForm();
-      // If CSV loaded, update dashboard
+      // Update dashboard and table, even if no CSV loaded
       if (lastCSVText) {
         window.displayCSVTable(lastCSVText, true);
+      } else {
+        // No CSV loaded: use only manual transactions
+        const emptyHeaders = ['date','category','amount','description'];
+        const emptyCSV = emptyHeaders.join(',') + '\n';
+        window.displayCSVTable(emptyCSV, true);
       }
     });
   }
