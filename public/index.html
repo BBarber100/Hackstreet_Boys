@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSV Uploader</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Upload Your CSV File</h1>
+    <div id="drop-area">
+      <form class="my-form">
+        <p>Drag & drop a CSV file here, or</p>
+        <input type="file" id="fileElem" accept=".csv" style="display:none" onchange="handleFiles(this.files)">
+        <label class="button" for="fileElem">Choose File</label>
+      </form>
+    </div>
+    <div id="file-info"></div>
+  </div>
+  <script src="js/uploader.js"></script>
+</body>
+</html>
