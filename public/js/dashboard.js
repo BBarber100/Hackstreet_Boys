@@ -1,3 +1,29 @@
+// Compute summary values from CSV data
+function computeSummary(data) {
+  let totalIncome = 0, totalExpenses = 0, count = 0;
+  data.forEach(row => {
+    const amt = parseFloat(row['amount']);
+    const cat = row['category'] ? row['category'].toLowerCase() : '';
+    if (!isNaN(amt)) {
+      count++;
+      if (amt > 0 && cat === 'income') totalIncome += amt;
+      else if (amt < 0 && cat !== 'income') totalExpenses += Math.abs(amt);
+    }
+  });
+  return {
+    totalIncome,
+    totalExpenses,
+    netBalance: totalIncome - totalExpenses,
+    count
+  };
+}
+
+function updateSummaryCards(summary) {
+  document.getElementById('summary-income').textContent = `$${summary.totalIncome.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+  document.getElementById('summary-expenses').textContent = `$${summary.totalExpenses.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+  document.getElementById('summary-balance').textContent = `$${summary.netBalance.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+  document.getElementById('summary-transactions').textContent = summary.count;
+}
 // Helper: Group spendings by date (expenses only, sum absolute values)
 function groupSpendingsByDate(data) {
   const spendings = {};
@@ -228,6 +254,8 @@ function renderPieChart(sums) {
   window.displayCSVTable = function(csvText) {
     origDisplayCSVTable(csvText);
     const data = parseCSV(csvText);
+    const summary = computeSummary(data);
+    updateSummaryCards(summary);
     const sums = groupByCategory(data);
     renderPieChart(sums);
     // Render line chart for spendings over time

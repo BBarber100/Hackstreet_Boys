@@ -1,3 +1,53 @@
+/* Summary Cards Row */
+.summary-cards-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 24px;
+  margin-bottom: 32px;
+  margin-top: 8px;
+}
+.summary-card {
+  flex: 1 1 0;
+  background: rgba(255,255,255,0.22);
+  border-radius: 18px;
+  box-shadow: 0 4px 32px 0 rgba(99,102,241,0.10);
+  padding: 24px 18px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-main);
+  font-size: 1.1rem;
+  min-width: 140px;
+  min-height: 110px;
+  position: relative;
+  transition: box-shadow 0.3s, background 0.3s;
+  border: 1.5px solid rgba(99,102,241,0.18);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  overflow: hidden;
+}
+.summary-card:hover {
+  box-shadow: 0 12px 48px 0 rgba(99,102,241,0.18);
+  background: #f3f4f6;
+}
+.summary-card .summary-label {
+  font-size: 1.02rem;
+  color: #6366F1;
+  font-weight: 600;
+  margin-top: 8px;
+}
+.summary-card .summary-value {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #23232a;
+  margin-top: 4px;
+}
+.summary-card {
+  font-size: 2.1rem;
+}
 /* Add padding underneath the pie chart title */
 .card-charts h2 {
   display: none;
