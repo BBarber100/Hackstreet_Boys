@@ -1,18 +1,27 @@
+/* Add padding underneath the pie chart title */
+.card-charts h2 {
+  display: none;
+}
 .card-charts {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 400px;
+  align-items: stretch;
+  justify-content: stretch;
+  min-height: 0;
+  padding: 0;
+  box-shadow: none;
+  background: none;
 }
 .card-charts canvas {
   background: #fff;
   border-radius: 18px;
-  box-shadow: 0 4px 32px 0 rgba(99,102,241,0.10);
+  box-shadow: 0 2px 8px 0 rgba(60,72,100,0.06);
   margin: 0 auto;
-  max-width: 380px;
-  max-height: 380px;
-  padding: 18px;
+  max-width: 100%;
+  max-height: 100%;
+  padding: 0;
+  width: 100% !important;
+  height: 100% !important;
   transition: box-shadow 0.4s cubic-bezier(.4,2,.6,1), background 0.3s;
   will-change: box-shadow, transform;
 }
@@ -263,17 +272,39 @@ body {
 }
 .charts-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 2.5rem;
-  align-items: start;
-  min-height: 340px;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: stretch;
+  min-height: 420px;
+  width: 100%;
+  margin-bottom: 1rem;
 }
 canvas {
-  background: rgba(243,244,246,0.85);
-  border-radius: var(--radius);
+  background: #fff;
+  border-radius: 18px;
   box-shadow: 0 2px 8px 0 rgba(60,72,100,0.06);
-  padding: 12px;
+  padding: 0;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+  margin: 0 auto;
   transition: box-shadow var(--transition), background var(--transition);
+}
+/* Prevent pie chart legend/key from overlapping category totals */
+.chart-legend {
+  margin-top: 0.5rem;
+  margin-bottom: 0.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  align-items: flex-start;
+  justify-content: flex-start;
+  font-size: 0.82rem;
+  line-height: 1.2;
+  z-index: 1;
+  max-width: 100%;
 }
 canvas:hover {
   box-shadow: 0 4px 24px 0 rgba(99,102,241,0.13);
@@ -358,14 +389,17 @@ canvas:hover {
   box-shadow: 0 2px 8px 0 rgba(99,102,241,0.10);
 }
 .chart-canvas-wrapper {
-  min-width: 400px;
-  min-height: 400px;
+  min-width: 0;
+  min-height: 0;
   width: 100%;
-  height: 100%;
+  height: 420px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex: 1 1 0%;
+  padding: 0;
+  background: none;
+  box-shadow: none;
 }
 /* Dark mode styles */
 body.dark-mode, .dashboard-bg.dark-mode {
