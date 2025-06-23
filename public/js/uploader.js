@@ -66,18 +66,29 @@ function displayCSVTable(csvText) {
     const trHead = document.createElement('tr');
     header.forEach(cell => {
       const th = document.createElement('th');
-      th.textContent = cell;
+      th.textContent = cell.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      th.style.fontWeight = 'bold';
+      th.style.textTransform = 'capitalize';
       trHead.appendChild(th);
     });
     table.appendChild(trHead);
     // Data
     const startIdx = (page - 1) * rowsPerPage;
     const endIdx = Math.min(startIdx + rowsPerPage, dataRows.length);
+    // Find the index of the amount column
+    const amountColIdx = header.findIndex(h => h.trim().toLowerCase() === 'amount');
     for (let i = startIdx; i < endIdx; i++) {
       const tr = document.createElement('tr');
-      dataRows[i].forEach(cell => {
+      dataRows[i].forEach((cell, colIdx) => {
         const td = document.createElement('td');
         td.textContent = cell;
+        if (colIdx === amountColIdx) {
+          const num = parseFloat(cell.replace(/[^\d.-]/g, ''));
+          if (!isNaN(num)) {
+            if (num > 0) td.classList.add('amount-positive');
+            else if (num < 0) td.classList.add('amount-negative');
+          }
+        }
         tr.appendChild(td);
       });
       table.appendChild(tr);
