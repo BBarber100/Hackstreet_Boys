@@ -29,6 +29,31 @@
           </div>
           <div id="file-info"></div>
         </section>
+
+        <!-- New Transaction Form Section -->
+        <section class="card card-new-transaction">
+          <h2>Add New Transaction</h2>
+          <form id="new-transaction-form" class="transaction-form">
+            <div class="form-row">
+              <label for="transaction-date">Date</label>
+              <input type="date" id="transaction-date" name="date" required>
+            </div>
+            <div class="form-row">
+              <label for="transaction-category">Category</label>
+              <input type="text" id="transaction-category" name="category" placeholder="e.g. Groceries" required>
+            </div>
+            <div class="form-row">
+              <label for="transaction-amount">Amount</label>
+              <input type="number" id="transaction-amount" name="amount" step="0.01" placeholder="e.g. -50.00" required>
+            </div>
+            <div class="form-row">
+              <label for="transaction-description">Description</label>
+              <input type="text" id="transaction-description" name="description" placeholder="Optional">
+            </div>
+            <button type="submit" class="button button-primary">Add Transaction</button>
+            <div id="transaction-form-message" style="margin-top:8px;"></div>
+          </form>
+        </section>
         <section class="card card-charts">
           <div class="summary-cards-row">
             <div class="summary-card" id="card-income">💰<div class="summary-label">Total Income</div><div class="summary-value" id="summary-income">$0.00</div></div>

@@ -1,3 +1,80 @@
+// --- New Transaction Form Logic ---
+const NEW_TX_KEY = 'new_transactions';
+let lastCSVText = '';
+
+function getStoredTransactions() {
+  return JSON.parse(sessionStorage.getItem(NEW_TX_KEY) || '[]');
+}
+
+function storeTransaction(tx) {
+  const arr = getStoredTransactions();
+  arr.push(tx);
+  sessionStorage.setItem(NEW_TX_KEY, JSON.stringify(arr));
+}
+
+function mergeTransactions(csvData) {
+  // Merge CSV data with new transactions from sessionStorage
+  const newTxs = getStoredTransactions();
+  return csvData.concat(newTxs);
+}
+
+function clearTransactionForm() {
+  document.getElementById('new-transaction-form').reset();
+}
+
+function showTransactionMessage(msg, color = '#10B981') {
+  const el = document.getElementById('transaction-form-message');
+  el.textContent = msg;
+  el.style.color = color;
+  setTimeout(() => { el.textContent = ''; }, 2000);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('new-transaction-form');
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const date = document.getElementById('transaction-date').value;
+      const category = document.getElementById('transaction-category').value;
+      const amount = document.getElementById('transaction-amount').value;
+      const description = document.getElementById('transaction-description').value;
+      if (!date || !category || !amount) {
+        showTransactionMessage('Please fill all required fields.', '#EF4444');
+        return;
+      }
+      const tx = { date, category, amount, description };
+      storeTransaction(tx);
+      showTransactionMessage('Transaction added!');
+      clearTransactionForm();
+      // If CSV loaded, update dashboard
+      if (lastCSVText) {
+        window.displayCSVTable(lastCSVText, true);
+      }
+    });
+  }
+});
+
+// Patch displayCSVTable to merge new transactions
+(function() {
+  const origDisplayCSVTable = window.displayCSVTable;
+  window.displayCSVTable = function(csvText, skipOrig) {
+    lastCSVText = csvText;
+    const data = parseCSV(csvText);
+    const merged = mergeTransactions(data);
+    if (!skipOrig) origDisplayCSVTable(csvText);
+    // Update summary, charts, and table with merged data
+    const summary = computeSummary(merged);
+    updateSummaryCards(summary);
+    const sums = groupByCategory(merged);
+    renderPieChart(sums);
+    const spendingData = groupSpendingsByDate(merged);
+    renderLineChart(spendingData);
+    // Update table if present
+    if (window.renderCSVTable) {
+      window.renderCSVTable(merged);
+    }
+  };
+})();
 // Compute summary values from CSV data
 function computeSummary(data) {
   let totalIncome = 0, totalExpenses = 0, count = 0;
@@ -248,18 +325,4 @@ function renderPieChart(sums) {
   });
 }
 
-// Listen for CSV table display and trigger chart update
-(function() {
-  const origDisplayCSVTable = window.displayCSVTable;
-  window.displayCSVTable = function(csvText) {
-    origDisplayCSVTable(csvText);
-    const data = parseCSV(csvText);
-    const summary = computeSummary(data);
-    updateSummaryCards(summary);
-    const sums = groupByCategory(data);
-    renderPieChart(sums);
-    // Render line chart for spendings over time
-    const spendingData = groupSpendingsByDate(data);
-    renderLineChart(spendingData);
-  };
-})();
+// ...existing code...

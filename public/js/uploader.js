@@ -1,3 +1,169 @@
+// Expose a function to render the table from array-of-objects data (merged CSV + new transactions)
+window.renderCSVTable = function(dataArr) {
+  const container = document.getElementById('csv-table-container');
+  const tableSection = document.getElementById('csv-table-section');
+  if (tableSection) tableSection.style.display = 'block';
+  container.innerHTML = '';
+  if (!dataArr || !dataArr.length) return;
+  const header = Object.keys(dataArr[0]);
+  const rows = dataArr.map(row => header.map(h => row[h] || ''));
+  const rowsPerPage = 10;
+  let currentPage = 1;
+  let filteredRows = rows;
+
+  // Populate category filter
+  const catIdx = header.findIndex(h => h.trim().toLowerCase() === 'category');
+  const filterCategory = document.getElementById('filter-category');
+  if (catIdx !== -1 && filterCategory) {
+    const cats = Array.from(new Set(rows.map(r => r[catIdx]).filter(Boolean)));
+    filterCategory.innerHTML = '<option value="">All Categories</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+  }
+
+  function applyFilters() {
+    const search = document.getElementById('filter-search').value.toLowerCase();
+    const category = document.getElementById('filter-category').value;
+    const startDate = document.getElementById('filter-start-date').value;
+    const endDate = document.getElementById('filter-end-date').value;
+    const dateIdx = header.findIndex(h => h.trim().toLowerCase() === 'date');
+    filteredRows = rows.filter(row => {
+      let match = true;
+      if (search) {
+        match = row.some(cell => cell.toLowerCase().includes(search));
+      }
+      if (match && category) {
+        match = row[catIdx] === category;
+      }
+      if (match && (startDate || endDate) && dateIdx !== -1) {
+        const parseDate = v => {
+          if (!v) return 0;
+          if (v.includes('/')) {
+            const parts = v.split('/');
+            if (parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]).getTime();
+          }
+          return Date.parse(v);
+        };
+        const rowDate = parseDate(row[dateIdx]);
+        if (startDate) {
+          const startTs = Date.parse(startDate);
+          match = match && rowDate >= startTs;
+        }
+        if (endDate) {
+          const endTs = Date.parse(endDate);
+          match = match && rowDate <= endTs;
+        }
+      }
+      return match;
+    });
+    currentPage = 1;
+    renderTable(currentPage);
+  }
+
+  ['filter-search', 'filter-category', 'filter-start-date', 'filter-end-date'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.oninput = applyFilters;
+  });
+  const clearBtn = document.getElementById('filter-clear');
+  if (clearBtn) clearBtn.onclick = function() {
+    document.getElementById('filter-search').value = '';
+    document.getElementById('filter-category').value = '';
+    document.getElementById('filter-start-date').value = '';
+    document.getElementById('filter-end-date').value = '';
+    applyFilters();
+  };
+
+  let sortCol = null;
+  let sortDir = 1;
+  function renderTable(page) {
+    container.innerHTML = '';
+    const table = document.createElement('table');
+    table.style.width = '100%';
+    table.style.borderCollapse = 'collapse';
+    const trHead = document.createElement('tr');
+    header.forEach((cell, colIdx) => {
+      const th = document.createElement('th');
+      th.style.fontWeight = 'bold';
+      th.style.textTransform = 'capitalize';
+      th.style.cursor = 'pointer';
+      let arrow = '';
+      if (sortCol === colIdx) arrow = sortDir === 1 ? ' ▲' : ' ▼';
+      th.innerHTML = cell.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) + arrow;
+      th.onclick = () => {
+        if (sortCol === colIdx) {
+          sortDir *= -1;
+        } else {
+          sortCol = colIdx;
+          sortDir = 1;
+        }
+        filteredRows.sort((a, b) => {
+          let va = a[colIdx], vb = b[colIdx];
+          if (header[colIdx].trim().toLowerCase() === 'date') {
+            const parseDate = v => {
+              if (!v) return 0;
+              if (v.includes('/')) {
+                const parts = v.split('/');
+                if (parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]).getTime();
+              }
+              return Date.parse(v);
+            };
+            return (parseDate(va) - parseDate(vb)) * sortDir;
+          }
+          const na = parseFloat(va.replace ? va.replace(/[^\d.-]/g, '') : va);
+          const nb = parseFloat(vb.replace ? vb.replace(/[^\d.-]/g, '') : vb);
+          if (!isNaN(na) && !isNaN(nb)) {
+            return (na - nb) * sortDir;
+          }
+          return va.localeCompare(vb) * sortDir;
+        });
+        renderTable(1);
+      };
+      trHead.appendChild(th);
+    });
+    table.appendChild(trHead);
+    const startIdx = (page - 1) * rowsPerPage;
+    const endIdx = Math.min(startIdx + rowsPerPage, filteredRows.length);
+    const amountColIdx = header.findIndex(h => h.trim().toLowerCase() === 'amount');
+    const dateColIdx = header.findIndex(h => h.trim().toLowerCase() === 'date');
+    for (let i = startIdx; i < endIdx; i++) {
+      const tr = document.createElement('tr');
+      filteredRows[i].forEach((cell, colIdx) => {
+        const td = document.createElement('td');
+        if (colIdx === dateColIdx) {
+          td.textContent = formatDateDMY(cell);
+        } else {
+          td.textContent = cell;
+        }
+        if (colIdx === amountColIdx) {
+          const num = parseFloat(cell.replace(/[^\d.-]/g, ''));
+          if (!isNaN(num)) {
+            if (num > 0) td.classList.add('amount-positive');
+            else if (num < 0) td.classList.add('amount-negative');
+          }
+        }
+        tr.appendChild(td);
+      });
+      table.appendChild(tr);
+    }
+    container.appendChild(table);
+    const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+    if (totalPages > 1) {
+      const pagination = document.createElement('div');
+      pagination.className = 'pagination';
+      for (let p = 1; p <= totalPages; p++) {
+        const btn = document.createElement('button');
+        btn.textContent = p;
+        btn.className = 'pagination-btn' + (p === page ? ' active' : '');
+        btn.onclick = () => {
+          currentPage = p;
+          renderTable(currentPage);
+        };
+        pagination.appendChild(btn);
+      }
+      container.appendChild(pagination);
+    }
+  }
+  renderTable(currentPage);
+  applyFilters();
+};
 // Helper to format date as DD/MM/YYYY
 function formatDateDMY(dateStr) {
   if (!dateStr) return '';

@@ -1,3 +1,51 @@
+/* --- New Transaction Form Styles --- */
+.card-new-transaction {
+  margin-bottom: 24px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 2px 16px 0 rgba(99,102,241,0.07);
+  padding: 32px 28px 24px 28px;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.transaction-form .form-row {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px;
+}
+.transaction-form label {
+  font-weight: 600;
+  color: #6366F1;
+  margin-bottom: 6px;
+  font-size: 15px;
+}
+.transaction-form input[type="text"],
+.transaction-form input[type="number"],
+.transaction-form input[type="date"] {
+  padding: 10px 12px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 15px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+.transaction-form input:focus {
+  border-color: #6366F1;
+  outline: none;
+}
+.transaction-form button[type="submit"] {
+  margin-top: 8px;
+  width: 100%;
+  font-size: 16px;
+  padding: 12px 0;
+}
+#transaction-form-message {
+  min-height: 20px;
+  font-size: 14px;
+  color: #10B981;
+  text-align: center;
+}
 /* Filters Section */
 .filters-section {
   display: flex;
