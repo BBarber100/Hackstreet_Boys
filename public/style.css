@@ -312,11 +312,6 @@ body {
   gap: 32px;
   animation: fadeInUp 1.1s cubic-bezier(.4,0,.2,1);
 }
-.full-width {
-  width: 100%;
-  margin-bottom: 0;
-}
-
 
 .card {
   background: var(--color-card);
