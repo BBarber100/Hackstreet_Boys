@@ -5,9 +5,9 @@
   border-radius: 18px;
   box-shadow: 0 2px 16px 0 rgba(99,102,241,0.07);
   padding: 32px 28px 24px 28px;
-  max-width: 480px;
-  margin-left: auto;
-  margin-right: auto;
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
 }
 .transaction-form .form-row {
   display: flex;
