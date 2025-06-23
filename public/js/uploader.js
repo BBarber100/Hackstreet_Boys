@@ -48,9 +48,23 @@ window.handleFiles = function(files) {
   const reader = new FileReader();
   reader.onload = function(e) {
     const text = e.target.result;
-    displayCSVTable(text);
+    // Store CSV text in sessionStorage
+    sessionStorage.setItem('csvData', text);
+    sessionStorage.setItem('csvFileName', file.name);
+    // Now trigger table/chart/summary reloads
+    loadCSVDataAndRender();
   };
   reader.readAsText(file);
+}
+
+// Helper to load CSV from sessionStorage and render table/charts/summary
+function loadCSVDataAndRender() {
+  const csvText = sessionStorage.getItem('csvData');
+  if (!csvText) return;
+  displayCSVTable(csvText);
+  // If you have chart/summary rendering functions, call them here, e.g.:
+  // renderChartsFromCSV(csvText);
+  // renderSummaryFromCSV(csvText);
 }
 
 
@@ -240,3 +254,10 @@ function displayCSVTable(csvText) {
   // Initial filter to populate table
   applyFilters();
 }
+
+// On page load, if sessionStorage has CSV data, load it
+document.addEventListener('DOMContentLoaded', function() {
+  if (sessionStorage.getItem('csvData')) {
+    loadCSVDataAndRender();
+  }
+});
