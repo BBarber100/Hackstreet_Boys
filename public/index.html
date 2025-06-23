@@ -4,21 +4,45 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CSV Uploader</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@400;600&display=swap">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Upload Your CSV File</h1>
-    <div id="drop-area">
-      <form class="my-form">
-        <p>Drag & drop a CSV file here, or</p>
-        <input type="file" id="fileElem" accept=".csv" style="display:none" onchange="handleFiles(this.files)">
-        <label class="button" for="fileElem">Choose File</label>
-      </form>
+  <div class="dashboard-bg">
+    <div class="dashboard-container">
+      <header class="dashboard-header">
+        <h1>Finance Dashboard</h1>
+        <p class="subtitle">Upload and visualize your CSV transactions</p>
+      </header>
+      <main class="dashboard-main">
+        <section class="card card-uploader">
+          <h2>CSV Uploader</h2>
+          <div id="drop-area" class="uploader-area">
+            <form class="my-form">
+              <div class="uploader-icon">
+                <svg width="48" height="48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="48" height="48" rx="12" fill="#F3F4F6"/><path d="M24 32V16M24 16l-6 6M24 16l6 6" stroke="#6366F1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="12" y="34" width="24" height="2" rx="1" fill="#6366F1"/></svg>
+              </div>
+              <p class="uploader-text">Drag & drop a CSV file here, or</p>
+              <input type="file" id="fileElem" accept=".csv" style="display:none" onchange="handleFiles(this.files)">
+              <label class="button button-primary" for="fileElem">Choose File</label>
+            </form>
+          </div>
+          <div id="file-info"></div>
+        </section>
+        <section class="card card-charts">
+          <h2>Overview</h2>
+          <div class="charts-grid">
+            <canvas id="mainChart"></canvas>
+            <canvas id="secondaryChart"></canvas>
+          </div>
+        </section>
+      </main>
     </div>
-    <div id="file-info"></div>
-    <div id="csv-table-container"></div>
   </div>
+  <div id="file-info"></div>
+  <div id="csv-table-container"></div>
   <script src="js/uploader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="js/dashboard.js"></script>
 </body>
 </html>
